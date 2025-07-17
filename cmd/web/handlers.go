@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 )
@@ -10,6 +9,24 @@ import (
 // Define a home handler function writes a byte slice containing
 // "Hello from Snippetbox" as the response body
 func home(w http.ResponseWriter, r *http.Request) {
+	// Set a new cache-control header. If an existing "Cache-Control" header exists
+	// It will be overwritten
+	// w.Header().Set("Cache-Control", "public, max-age=31536000")
+
+	// In contrast, the Add() method appends a new "Cache-Control" header and can
+	// be called multiple times.
+	// w.Header().Add("Cache-Control", "public")
+	// w.Header().Add("Cache-Control", "max-age=31536000")
+
+	// Delete all values for the "Cache-Control" header.
+	// w.Header().Del("Cache-Control")
+
+	// Retrieve the first value for the "Cache-Control" header
+	// w.Header().Get("Cache-Control")
+
+	//Retrieve a slice of all values for the "Cache-Control"
+	// w.Header().Values("Cache-Control")
+
 	// Use the Header().Add() method to add a 'Server: Go' header to the
 	// response header map. The first parameter is the header name, and
 	// the second parameter is the header value.
@@ -32,8 +49,9 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 
 	// Use the fmt.SprintF() function to interpolate the id value with a
 	// message, then write it as the HTTP response.
-	msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
-	w.Write([]byte(msg))
+	// msg := fmt.Sprintf("Display a specific snippet with ID %d...", id)
+	// w.Write([]byte(msg))
+	fmt.Fprintf(w, "Display a specific snippet with ID %d...", id)
 }
 
 // Add a snippetCreate handler function
@@ -47,27 +65,4 @@ func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 
 	w.Write([]byte("Save a new snippet..."))
-}
-
-func main() {
-	// Use the http.NewServerMux() function to initialize a new servemux, then
-	// register the home function as the handler for the "/" URL pattern.
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", home)                      //Restrict this route to exact matches on / only
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView) // Add the (id) wildcard segment
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
-	// Create the new route, which is restricted to POST request only,
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
-
-	// Print a log message to say that the server is starting
-	log.Print("Starting server on :4000")
-
-	// Use the http.listenAndServe() function to start a new web server. Web pass in
-	// two parameters: the TCP network address to listen on (in this case "":4000")
-	// and the servemux we just created. If http.ListenAndServe() returns an error
-	// we use the log.Fatal() function to log the error message and terminate the
-	// program. Note that any error returned by http.ListenAndServe() is always
-	// non-nil
-	err := http.ListenAndServe(":4000", mux)
-	log.Fatal(err)
 }
