@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 )
 
 func main() {
@@ -18,6 +19,10 @@ func main() {
 	// otherwise it will always contain the default value of ":4000". If any erros are
 	// encountered during parsing the application will be terminated
 	flag.Parse()
+
+	// Use the slog.New() function to initialize a new structured logger, which
+	// writes to the standard out stram and uses the default settings
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	// Use the http.NewServerMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
@@ -41,7 +46,11 @@ func main() {
 
 	// Print a log message to say that the server is starting
 	// log.Print("Starting server on :4000")
-	log.Printf("starting server on %s", *addr)
+	// Use the info() method to log the starting server message at info severity
+	// (along with the listen address as an attribute)
+	logger.Info("starting server", "addr", *addr)
+
+	// log.Printf("starting server on %s", *addr)
 
 	// Use the http.listenAndServe() function to start a new web server. Web pass in
 	// two parameters: the TCP network address to listen on (in this case "":4000")
@@ -51,5 +60,10 @@ func main() {
 	// non-nil
 	// err := http.ListenAndServe(":4000", mux)
 	err := http.ListenAndServe(*addr, mux)
-	log.Fatal(err)
+	// log.Fatal(err)
+	// And we also use the Error() method to log any error message returned by
+	// http.ListenAndServe() at Error severity (with no additional attributes)
+	// and the call os.Exit(1) to termiante the application with exit code 1.
+	logger.Error(err.Error())
+	os.Exit(1)
 }
