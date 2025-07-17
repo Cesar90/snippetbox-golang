@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 // Define a home handler function writes a byte slice containing
@@ -31,8 +33,37 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// response header map. The first parameter is the header name, and
 	// the second parameter is the header value.
 	w.Header().Add("Server", "Go")
+	// w.Write([]byte("Hello from Snippetbox"))
 
-	w.Write([]byte("Hello from Snippetbox"))
+	// Use the template.ParseFiles() function to read the template file into a
+	// template set. If there's an error, we log the detailed error message, use
+	// the http.Error() function to send and internal Server Error response to the
+	// user, and then return the handler so no subsequent code is executed
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/home.tmpl",
+	}
+
+	// ts, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
+	// err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+
+	// Then we use the Execute() method on the template set to write the
+	// template content as the response body. The last parameter to Execute()
+	// represents any dynamic data that we want to pass in, which for now we'll
+	// leave as nil
+
 }
 
 // Add a snippetView handler function
