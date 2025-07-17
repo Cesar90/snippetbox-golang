@@ -1,11 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 )
 
 func main() {
+	// Define a new command-line flag with the name 'addr', a default value of ":4000"
+	// and some short help text explaining what the flag controls. The value of the
+	// flag will be stored in the addr variable at runtime
+	addr := flag.String("addr", ":4000", "HTTP network address")
+
+	// Importantly, we use the flag.Parse() function to parse the command-file flag
+	// This reads in the command-line flag value and assigns it to addr
+	// variable. You need to call this *before* you use the addr variable
+	// otherwise it will always contain the default value of ":4000". If any erros are
+	// encountered during parsing the application will be terminated
+	flag.Parse()
+
 	// Use the http.NewServerMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
@@ -27,7 +40,8 @@ func main() {
 	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
 
 	// Print a log message to say that the server is starting
-	log.Print("Starting server on :4000")
+	// log.Print("Starting server on :4000")
+	log.Printf("starting server on %s", *addr)
 
 	// Use the http.listenAndServe() function to start a new web server. Web pass in
 	// two parameters: the TCP network address to listen on (in this case "":4000")
@@ -35,6 +49,7 @@ func main() {
 	// we use the log.Fatal() function to log the error message and terminate the
 	// program. Note that any error returned by http.ListenAndServe() is always
 	// non-nil
-	err := http.ListenAndServe(":4000", mux)
+	// err := http.ListenAndServe(":4000", mux)
+	err := http.ListenAndServe(*addr, mux)
 	log.Fatal(err)
 }
