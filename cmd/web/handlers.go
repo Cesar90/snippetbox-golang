@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -53,23 +52,24 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
 		// log.Print(err.Error())
-		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 		return
 	}
 
 	// err = ts.Execute(w, nil)
 	err = ts.ExecuteTemplate(w, "base", nil)
 	if err != nil {
-		log.Print(err.Error())
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		// log.Print(err.Error())
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
 	}
 
 	// Then we use the Execute() method on the template set to write the
 	// template content as the response body. The last parameter to Execute()
 	// represents any dynamic data that we want to pass in, which for now we'll
 	// leave as nil
-
 }
 
 // Add a snippetView handler function
