@@ -7,6 +7,13 @@ import (
 	"os"
 )
 
+// Define an application struct to hold the application-wide dependencies for the
+// web application. For now we'll only include the structured logger, but we'll
+// add more to this as developer progresses
+type application struct {
+	logger *slog.Logger
+}
+
 func main() {
 	// Define a new command-line flag with the name 'addr', a default value of ":4000"
 	// and some short help text explaining what the flag controls. The value of the
@@ -24,6 +31,12 @@ func main() {
 	// writes to the standard out stram and uses the default settings
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
+	// Initialize a new instance of our application struct, containing the
+	// dependencies (for now, just the structured logger)
+	app := &application{
+		logger: logger,
+	}
+
 	// Use the http.NewServerMux() function to initialize a new servemux, then
 	// register the home function as the handler for the "/" URL pattern.
 	mux := http.NewServeMux()
@@ -38,11 +51,11 @@ func main() {
 	// "/static" prefix before the request reaches the file server.
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	mux.HandleFunc("GET /{$}", home)                      //Restrict this route to exact matches on / only
-	mux.HandleFunc("GET /snippet/view/{id}", snippetView) // Add the (id) wildcard segment
-	mux.HandleFunc("GET /snippet/create", snippetCreate)
+	mux.HandleFunc("GET /{$}", app.home)                      //Restrict this route to exact matches on / only
+	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView) // Add the (id) wildcard segment
+	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
 	// Create the new route, which is restricted to POST request only,
-	mux.HandleFunc("POST /snippet/create", snippetCreatePost)
+	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
 
 	// Print a log message to say that the server is starting
 	// log.Print("Starting server on :4000")

@@ -10,7 +10,11 @@ import (
 
 // Define a home handler function writes a byte slice containing
 // "Hello from Snippetbox" as the response body
-func home(w http.ResponseWriter, r *http.Request) {
+
+// Change the signature of the handler so it is defined as a method against
+// *application
+
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Set a new cache-control header. If an existing "Cache-Control" header exists
 	// It will be overwritten
 	// w.Header().Set("Cache-Control", "public, max-age=31536000")
@@ -48,8 +52,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// ts, err := template.ParseFiles("./ui/html/pages/home.tmpl")
 	ts, err := template.ParseFiles(files...)
 	if err != nil {
-		log.Print(err.Error())
+		// log.Print(err.Error())
+		app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 
 	// err = ts.Execute(w, nil)
@@ -67,7 +73,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 // Add a snippetView handler function
-func snippetView(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// Extract the value of the id wildcard from the request using r.PathValue()
 	// and try to convert it to a integer using the strconv.Atoi() function. If
 	// it can't be converted to an integer, or the value is less than 1, we
@@ -86,12 +92,12 @@ func snippetView(w http.ResponseWriter, r *http.Request) {
 }
 
 // Add a snippetCreate handler function
-func snippetCreate(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Display a form for creating a new snippet..."))
 }
 
 // Add a snippetCreatePost handler function.
-func snippetCreatePost(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	// Use the w.WriteHeader() method to send a 201 status code.
 	w.WriteHeader(http.StatusCreated)
 
