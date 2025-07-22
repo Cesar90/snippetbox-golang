@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.cesar90.com/internal/models"
 	_ "github.com/go-sql-driver/mysql" // New import
 )
 
@@ -14,7 +15,8 @@ import (
 // web application. For now we'll only include the structured logger, but we'll
 // add more to this as developer progresses
 type application struct {
-	logger *slog.Logger
+	logger   *slog.Logger
+	snippets *models.SnippetModel
 }
 
 func main() {
@@ -53,7 +55,8 @@ func main() {
 	// Initialize a new instance of our application struct, containing the
 	// dependencies (for now, just the structured logger)
 	app := &application{
-		logger: logger,
+		logger:   logger,
+		snippets: &models.SnippetModel{DB: db},
 	}
 
 	// Use the http.NewServerMux() function to initialize a new servemux, then
