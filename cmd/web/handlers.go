@@ -3,9 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
-	"text/template"
+
+	// "text/template"
 
 	"github.cesar90.com/internal/models"
 )
@@ -102,7 +104,31 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%+v", snippet)
+	files := []string{
+		"./ui/html/base.tmpl",
+		"./ui/html/partials/nav.tmpl",
+		"./ui/html/pages/view.tmpl",
+	}
+
+	// ts, err := template.ParseFiles("./ui/html/pages/home.tmpl")
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		// log.Print(err.Error())
+		// app.logger.Error(err.Error(), "method", r.Method, "uri", r.URL.RequestURI())
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
+		return
+	}
+
+	// err = ts.Execute(w, nil)
+	err = ts.ExecuteTemplate(w, "base", snippet)
+	if err != nil {
+		// log.Print(err.Error())
+		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		app.serverError(w, r, err)
+	}
+
+	// fmt.Fprintf(w, "%+v", snippet)
 }
 
 // Add a snippetCreate handler function
