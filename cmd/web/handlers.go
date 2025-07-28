@@ -39,7 +39,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// Use the Header().Add() method to add a 'Server: Go' header to the
 	// response header map. The first parameter is the header name, and
 	// the second parameter is the header value.
-	w.Header().Add("Server", "Go")
+	// w.Header().Add("Server", "Go")
 	// w.Write([]byte("Hello from Snippetbox"))
 
 	// Use the template.ParseFiles() function to read the template file into a
