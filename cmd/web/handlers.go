@@ -86,9 +86,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// template content as the response body. The last parameter to Execute()
 	// represents any dynamic data that we want to pass in, which for now we'll
 	// leave as nil
-	app.render(w, r, http.StatusOK, "home.tmpl", templateData{
-		Snippets: snippets,
-	})
+
+	// app.render(w, r, http.StatusOK, "home.tmpl", templateData{
+	// 	Snippets: snippets,
+	// })
+	data := app.newTemplateCache(r)
+	data.Snippets = snippets
+
+	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }
 
 // Add a snippetView handler function
@@ -148,9 +153,12 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// fmt.Fprintf(w, "%+v", snippet)
-	app.render(w, r, http.StatusOK, "view.tmpl", templateData{
-		Snippet: snippet,
-	})
+	// app.render(w, r, http.StatusOK, "view.tmpl", templateData{
+	// 	Snippet: snippet,
+	// })
+	data := app.newTemplateCache(r)
+	data.Snippet = snippet
+	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
 // Add a snippetCreate handler function

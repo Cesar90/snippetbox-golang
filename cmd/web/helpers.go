@@ -1,10 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
+
+func (app *application) newTemplateCache(r *http.Request) templateData {
+	return templateData{
+		CurrentYear: time.Now().Year(),
+	}
+}
 
 // The serverError helper writes a log entry at Error level (including the request
 // method and URI as attributes), then sends a generic 500 Internal Server Error
@@ -37,7 +45,8 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 		return
 	}
 
-	w.WriteHeader(status)
+	// Initialize a new buffer.
+	buf := new(bytes.Buffer)
 
 	// Execute the template set and write the response body. Again, if there
 	// is any error we call the serverError() helper
@@ -45,4 +54,13 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 	if err != nil {
 		app.serverError(w, r, err)
 	}
+
+	// If the template is written to the buffer without any errors, it's safe
+	// to go ahead and write the HTTP status code to http.ResponseWrite
+	w.WriteHeader(status)
+
+	// Write the contents of the buffer to the http.ResponseWrite. Note: this
+	// is anoter time where we pass our http.ResponseWriter to a function that
+	// takes an io.Writer
+	buf.WriteTo(w)
 }
