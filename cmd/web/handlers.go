@@ -47,6 +47,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// template set. If there's an error, we log the detailed error message, use
 	// the http.Error() function to send and internal Server Error response to the
 	// user, and then return the handler so no subsequent code is executed
+	snippets, err := app.snippets.Latest()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	files := []string{
 		"./ui/html/base.tmpl",
 		"./ui/html/partials/nav.tmpl",
@@ -63,8 +69,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create an instance of a templateData struct holding the slice of
+	// snippets
+	data := templateData{
+		Snippets: snippets,
+	}
+
 	// err = ts.Execute(w, nil)
-	err = ts.ExecuteTemplate(w, "base", nil)
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		// log.Print(err.Error())
 		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -120,8 +132,13 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Create an instance of a templateData struct holding the snippet data.
+	data := templateData{
+		Snippet: snippet,
+	}
+
 	// err = ts.Execute(w, nil)
-	err = ts.ExecuteTemplate(w, "base", snippet)
+	err = ts.ExecuteTemplate(w, "base", data)
 	if err != nil {
 		// log.Print(err.Error())
 		// http.Error(w, "Internal Server Error", http.StatusInternalServerError)
