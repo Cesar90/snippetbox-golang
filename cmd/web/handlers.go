@@ -171,9 +171,22 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 // Add a snippetCreatePost handler function.
 func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 
-	title := "0 snail"
-	content := "0 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n"
-	expires := 7
+	// title := "0 snail"
+	// content := "0 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n"
+	// expires := 7
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+	}
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
