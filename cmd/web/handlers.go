@@ -90,7 +90,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	// app.render(w, r, http.StatusOK, "home.tmpl", templateData{
 	// 	Snippets: snippets,
 	// })
-	data := app.newTemplateCache(r)
+	data := app.newTemplateData(r)
 	data.Snippets = snippets
 
 	app.render(w, r, http.StatusOK, "home.tmpl", data)
@@ -156,14 +156,16 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// app.render(w, r, http.StatusOK, "view.tmpl", templateData{
 	// 	Snippet: snippet,
 	// })
-	data := app.newTemplateCache(r)
+	data := app.newTemplateData(r)
 	data.Snippet = snippet
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
 // Add a snippetCreate handler function
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Display a form for creating a new snippet..."))
+	// w.Write([]byte("Display a form for creating a new snippet..."))
+	data := app.newTemplateData(r)
+	app.render(w, r, http.StatusOK, "create.tmpl", data)
 }
 
 // Add a snippetCreatePost handler function.
