@@ -137,8 +137,11 @@ func main() {
 		// log entries at the Error, level, and assign it to the ErrorLog Field. If
 		// you would prefer to log the server errors at Warn level instead, you,
 		// could pass slog.LevelWarn as the final parameter
-		ErrorLog:  slog.NewLogLogger(logger.Handler(), slog.LevelError),
-		TLSConfig: tlsConfig,
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	logger.Info("starting server", "addr", srv.Addr)
