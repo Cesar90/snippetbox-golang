@@ -22,10 +22,20 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
-	mux.HandleFunc("GET /snippet/create", app.snippetCreate)
-	mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
+
+	// Create a new middleware chain containing the middleware specific to our
+	// dynamic application routes. For now, this chain will only contain the
+	// LoadAndSave session middleware but we'll add more to it later
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
+
+	// mux.HandleFunc("GET /{$}", app.home)
+	// mux.HandleFunc("GET /snippet/view/{id}", app.snippetView)
+	// mux.HandleFunc("GET /snippet/create", app.snippetCreate)
+	// mux.HandleFunc("POST /snippet/create", app.snippetCreatePost)
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /snippet/view/{id}", dynamic.ThenFunc(app.snippetView))
+	mux.Handle("GET /snippet/create", dynamic.ThenFunc(app.snippetCreate))
+	mux.Handle("POST /snippet/create", dynamic.ThenFunc(app.snippetCreatePost))
 
 	// Pass the servemux as the 'next' parameter to the commonHeaders middleware
 	// Because commonHeaders is just a function, and the function returns a

@@ -170,8 +170,14 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	// app.render(w, r, http.StatusOK, "view.tmpl", templateData{
 	// 	Snippet: snippet,
 	// })
+
+	// We no longer need to check for the flash message
+	// flash := app.sessionManager.PopString(r.Context(), "flash")
+
 	data := app.newTemplateData(r)
 	data.Snippet = snippet
+
+	// data.Flash = flash
 	app.render(w, r, http.StatusOK, "view.tmpl", data)
 }
 
@@ -280,6 +286,10 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverError(w, r, err)
 	}
+
+	// Use the Put() method to add a string value ("Snippet successfully")
+	// created!) and the corresponding key("flash") to the session data.
+	app.sessionManager.Put(r.Context(), "flash", "Snippet successfully created!")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 	// Use the w.WriteHeader() method to send a 201 status code.
