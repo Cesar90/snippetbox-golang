@@ -18,11 +18,11 @@ import (
 // must be exported in order to be read by the html/template package when
 // rendering the template.
 type snippetCreateForm struct {
-	Title   string
-	Content string
-	Expires int
+	Title   string `form:"title"`
+	Content string `form:"content"`
+	Expires int    `form:"expires"`
 	// FieldErrors map[string]string
-	validator.Validator
+	validator.Validator `form:"-"`
 }
 
 // Define a home handler function writes a byte slice containing
@@ -192,25 +192,36 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 	// title := "0 snail"
 	// content := "0 snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n"
 	// expires := 7
-	err := r.ParseForm()
+	// err := r.ParseForm()
+	// if err != nil {
+	// 	app.clientError(w, http.StatusBadRequest)
+	// }
+
+	// title := r.PostForm.Get("title")
+	// content := r.PostForm.Get("content")
+	// expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+
+	// if err != nil {
+	// 	app.clientError(w, http.StatusBadRequest)
+	// 	return
+	// }
+
+	// form := snippetCreateForm{
+	// 	Title:   r.PostForm.Get("title"),
+	// 	Content: r.PostForm.Get("content"),
+	// 	Expires: expires,
+	// 	// FieldErrors: map[string]string{},
+	// }
+	var form snippetCreateForm
+
+	// err = app.formDecoder.Decode(&form, r.PostForm)
+	// if err != nil {
+	// 	app.clientError(w, http.StatusBadRequest)
+	// 	return
+	// }
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
-	}
-
-	title := r.PostForm.Get("title")
-	content := r.PostForm.Get("content")
-	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
-
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	form := snippetCreateForm{
-		Title:   r.PostForm.Get("title"),
-		Content: r.PostForm.Get("content"),
-		Expires: expires,
-		// FieldErrors: map[string]string{},
 	}
 
 	// Initialize a map to hold any validation errors for the form fields
@@ -264,7 +275,8 @@ func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	id, err := app.snippets.Insert(title, content, expires)
+	// id, err := app.snippets.Insert(title, content, expires)
+	id, err := app.snippets.Insert(form.Title, form.Content, form.Expires)
 	if err != nil {
 		app.serverError(w, r, err)
 	}

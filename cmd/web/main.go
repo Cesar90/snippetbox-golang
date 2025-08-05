@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.cesar90.com/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql" // New import
 )
 
@@ -19,6 +20,7 @@ type application struct {
 	logger        *slog.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -61,12 +63,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Initalize a decoder instance
+	formDecoder := form.NewDecoder()
+
 	// Initialize a new instance of our application struct, containing the
 	// dependencies (for now, just the structured logger)
 	app := &application{
 		logger:        logger,
 		snippets:      &models.SnippetModel{DB: db},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// Use the http.NewServerMux() function to initialize a new servemux, then
