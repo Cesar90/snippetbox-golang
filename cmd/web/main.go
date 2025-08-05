@@ -119,7 +119,21 @@ func main() {
 	// program. Note that any error returned by http.ListenAndServe() is always
 	// non-nil
 	// err := http.ListenAndServe(":4000", mux)
-	err = http.ListenAndServe(*addr, app.routes())
+	// err = http.ListenAndServe(*addr, app.routes())
+
+	srv := &http.Server{
+		Addr:    *addr,
+		Handler: app.routes(),
+		// Create a *log.Logger from our structured logger handler, which writes
+		// log entries at the Error, level, and assign it to the ErrorLog Field. If
+		// you would prefer to log the server errors at Warn level instead, you,
+		// could pass slog.LevelWarn as the final parameter
+		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	}
+
+	logger.Info("starting server", "addr", srv.Addr)
+	err = srv.ListenAndServe()
+
 	// log.Fatal(err)
 	// And we also use the Error() method to log any error message returned by
 	// http.ListenAndServe() at Error severity (with no additional attributes)
