@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql" // New import
 	"flag"
 	"html/template"
@@ -73,6 +74,11 @@ func main() {
 	sessionManager := scs.New()
 	sessionManager.Store = mysqlstore.New(db)
 	sessionManager.Lifetime = 12 * time.Hour
+	// Make sure that the Secure attribute is set on our session cookies.
+	// Settings this means that the cookie will only be sent by a user's web
+	// browser when an HTTPS connection is being used (and won't be sent over an)
+	// unsecure HTTP connection).
+	sessionManager.Cookie.Secure = true
 
 	// Initialize a new instance of our application struct, containing the
 	// dependencies (for now, just the structured logger)
@@ -120,6 +126,9 @@ func main() {
 	// non-nil
 	// err := http.ListenAndServe(":4000", mux)
 	// err = http.ListenAndServe(*addr, app.routes())
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 
 	srv := &http.Server{
 		Addr:    *addr,
@@ -128,11 +137,13 @@ func main() {
 		// log entries at the Error, level, and assign it to the ErrorLog Field. If
 		// you would prefer to log the server errors at Warn level instead, you,
 		// could pass slog.LevelWarn as the final parameter
-		ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		ErrorLog:  slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig: tlsConfig,
 	}
 
 	logger.Info("starting server", "addr", srv.Addr)
-	err = srv.ListenAndServe()
+	// err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
 	// log.Fatal(err)
 	// And we also use the Error() method to log any error message returned by
